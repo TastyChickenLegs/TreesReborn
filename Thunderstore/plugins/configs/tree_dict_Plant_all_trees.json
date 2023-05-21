@@ -6,6 +6,9 @@
 		"Pinetree_01_Stub:PineTree_Sapling",
 		"BirchStub:Birch_Sapling",
 		"OakStub:Oak_Sapling",
-		"SwampTree1_Stub:ancient_sapling"
+		"SwampTree1_Stub:ancient_sapling",
+		"YggaShoot1:YggaShoot1",
+		"YggaShoot2:YggaShoot2",
+		"YggaShoot3:YggaShoot"
 	]
 }

@@ -1,17 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Reflection;
-using System.Runtime.Remoting.Contexts;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using ServerSync;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using static TreesReborn.ServerSyncWrapper;
 
@@ -21,7 +18,7 @@ namespace TreesReborn
     public class TreesRebornPlugin : BaseUnityPlugin
     {
         internal const string ModName = "TreesReborn";
-        internal const string ModVersion = "1.0.0";
+        internal const string ModVersion = "1.0.4";
         internal const string Author = "TastyChickenLegs";
         private const string ModGUID = Author + "." + ModName;
         private static readonly bool isDebug = true;
@@ -30,19 +27,25 @@ namespace TreesReborn
         public static Dictionary<string, string> seedsDic = new Dictionary<string, string>();
         private readonly Harmony harmony = new(ModGUID);
         public static ConfigEntry<float> respawnDelay;
+        public static ConfigEntry<bool> useRandomSapling;
+
         public static readonly ManualLogSource TreesRebornLogger =
             BepInEx.Logging.Logger.CreateLogSource(ModName);
+
         public static ConfigEntry<bool> modEnabled;
+
         private static readonly ConfigSync ConfigSync = new(ModGUID)
-            { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
+        { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
+
         public static ConfigEntry<bool> growthSpace;
         private static TreesRebornPlugin context;
 
         public static void Dbgl(string str = "", bool pref = true)
         {
             if (isDebug)
-               UnityEngine.Debug.Log((pref ? typeof(TreesRebornPlugin).Namespace + " " : "") + str);
+                UnityEngine.Debug.Log((pref ? typeof(TreesRebornPlugin).Namespace + " " : "") + str);
         }
+
         public void Awake()
         {
             context = this;
@@ -53,17 +56,19 @@ namespace TreesReborn
             growthSpace = Config.Bind<bool>("General", "GrowthSpaceRestriction", true,
                 new ConfigDescription("Turn off the Growth Space Restrictions for Saplings", null,
                 new ConfigurationManagerAttributes { DispName = "Disable Not Enough Space" }));
+            useRandomSapling = Config.Bind<bool>("General", "useRandomSapling", false,
+                new ConfigDescription("Replant Random Sapling", null,
+                new ConfigurationManagerAttributes { DispName = "Replant Random Sapling" }));
 
             if (!modEnabled.Value)
                 return;
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             harmony.PatchAll(assembly);
-   
         }
+
         private void Start()
         {
-
             string jsonFile = "tree_dict.json";
             if (Chainloader.PluginInfos.ContainsKey("advize.PlantEverything"))
                 jsonFile = "tree_dict_Plant_Everything.json";
@@ -71,9 +76,11 @@ namespace TreesReborn
                 jsonFile = "tree_dict_Plant_all_trees.json";
             else if (Chainloader.PluginInfos.ContainsKey("com.bkeyes93.PlantingPlus"))
                 jsonFile = "tree_dict_PlantingPlus.json";
-
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),"configs", jsonFile);
-
+            
+            string modPath = Path.GetDirectoryName(Info.Location);
+           string path = Path.Combine(modPath, "configs", jsonFile);
+            //string path = Path.Combine(Path.Combine(modPath, "configs/" + jsonFile));
+            //Path.Combine(Path.GetDirectoryName(Plugin.Info.Location), "configs", ")
 
             string json = File.ReadAllText(path);
 
@@ -87,21 +94,30 @@ namespace TreesReborn
 
             Dbgl($"Loaded {seedsDic.Count} seeds from {path}");
         }
- 
 
         [HarmonyPatch(typeof(Destructible), "Destroy")]
-        static class Destroy_Patch
+        private static class Destroy_Patch
         {
-            static void Prefix(Destructible __instance)
+            private static void Prefix(Destructible __instance)
             {
                 if (Player.m_localPlayer)
                 {
                     Dbgl($"destroyed destructible {__instance.name}");
 
-                    string name = seedsDic.FirstOrDefault(s => __instance.name.StartsWith(s.Key)).Value;
+                    List<string> keyList = new List<string>(seedsDic.Values);
 
+                    string name;
+                    //random sapling code
+
+                    name = seedsDic.FirstOrDefault(s => __instance.name.StartsWith(s.Key)).Value;
+                    
                     if (name != null)
                     {
+                        if (useRandomSapling.Value)
+                        {
+                            name = keyList[Random.Range(0, keyList.Count)];
+                        }
+                        bool ward = PrivateArea.CheckAccess(__instance.transform.position, 0f, true, true);
                         Dbgl($"destroyed trunk {__instance.name}, trying to spawn {name}");
                         GameObject prefab = ZNetScene.instance.GetPrefab(name);
                         if (prefab != null)
@@ -119,10 +135,9 @@ namespace TreesReborn
         }
 
         [HarmonyPatch(typeof(Plant), "HaveGrowSpace")]
-
-        static class Grow_Space_Patch
+        private static class Grow_Space_Patch
         {
-            static void Postfix(Plant __instance, ref bool __result)
+            private static void Postfix(Plant __instance, ref bool __result)
             {
                 if (growthSpace.Value)
                 {
@@ -130,7 +145,6 @@ namespace TreesReborn
                     return;
                 }
             }
-
         }
 
         private static IEnumerator SpawnTree(GameObject prefab, Vector3 position)
@@ -140,9 +154,5 @@ namespace TreesReborn
             Instantiate(prefab, position, Quaternion.identity);
             Dbgl($"created new {prefab.name}");
         }
-
-
-
     }
-
 }

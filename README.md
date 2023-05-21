@@ -1,13 +1,15 @@
 
 # TreesReborn
 
-### Now with Ovens, Smelters, Braizers and Hottubs and Timed Torches
+### Replant trees automatically and configure random tree respawn... for Patch 0.214.2
 
 Replant trees automatically when they are cut down
 
 - Trees are automatically replanted when cut down.
 - no need for seeds
+- with serversync send configs down to all players form the server
 - compatible with plant everything and planting plus
+- can now respawn random trees (turned on in config)
 
 
  
@@ -43,6 +45,25 @@ Extract DLL from zip file into "<GameDirectory>\Bepinex\plugins"
 Start the game.
 
 ### Version Information
+
+
+1.0.4
+
+udpated to new public test branch and added Yggdrasil trees
+
+1.0.3
+
+updated to newest patch 0.214.300
+
+
+1.0.2
+
+Updated to newest Valheim Patch
+
+
+1.0.1
+
+- add ability to respawn random trees (turned on in config)
 
 
 1.0.0
