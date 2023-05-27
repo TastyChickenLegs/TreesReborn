@@ -18,16 +18,17 @@ namespace TreesReborn
     public class TreesRebornPlugin : BaseUnityPlugin
     {
         internal const string ModName = "TreesReborn";
-        internal const string ModVersion = "1.0.4";
+        internal const string ModVersion = "1.0.5";
         internal const string Author = "TastyChickenLegs";
         private const string ModGUID = Author + "." + ModName;
-        private static readonly bool isDebug = true;
+        private static ConfigEntry<bool> isDebug;
         internal static ConfigEntry<bool> continousLogs;
         internal static ConfigEntry<AlwaysEnabledToggle> isServerSyncOn;
         public static Dictionary<string, string> seedsDic = new Dictionary<string, string>();
         private readonly Harmony harmony = new(ModGUID);
         public static ConfigEntry<float> respawnDelay;
         public static ConfigEntry<bool> useRandomSapling;
+        public static ConfigEntry<float> treeRate;
 
         public static readonly ManualLogSource TreesRebornLogger =
             BepInEx.Logging.Logger.CreateLogSource(ModName);
@@ -42,7 +43,7 @@ namespace TreesReborn
 
         public static void Dbgl(string str = "", bool pref = true)
         {
-            if (isDebug)
+            if (isDebug.Value)
                 UnityEngine.Debug.Log((pref ? typeof(TreesRebornPlugin).Namespace + " " : "") + str);
         }
 
@@ -51,6 +52,7 @@ namespace TreesReborn
             context = this;
             isServerSyncOn = this.Config.BindHiddenForceEnabledSyncLocker(ConfigSync, "", "Use Server Sync");
             continousLogs = this.Config.Bind("General", "Show Continous Logs", false);
+            isDebug = Config.Bind<bool>("General", "DebugMode", false);
             respawnDelay = Config.Bind<float>("General", "RespawnDelay", 2.5f, "Delay in seconds to spawn sapling");
             modEnabled = Config.Bind<bool>("General", "Enabled", true, "Enable this mod");
             growthSpace = Config.Bind<bool>("General", "GrowthSpaceRestriction", true,
@@ -59,6 +61,10 @@ namespace TreesReborn
             useRandomSapling = Config.Bind<bool>("General", "useRandomSapling", false,
                 new ConfigDescription("Replant Random Sapling", null,
                 new ConfigurationManagerAttributes { DispName = "Replant Random Sapling" }));
+            treeRate = Config.Bind<float>("General", "treeRate", 1f,
+                new ConfigDescription("Chance that trees will be replanted.",
+                new AcceptableValueRange<float>(0f, 1f), null, 
+                new ConfigurationManagerAttributes { ShowRangeAsPercent = true, DispName = "Replant Chance" }));
 
             if (!modEnabled.Value)
                 return;
@@ -76,9 +82,9 @@ namespace TreesReborn
                 jsonFile = "tree_dict_Plant_all_trees.json";
             else if (Chainloader.PluginInfos.ContainsKey("com.bkeyes93.PlantingPlus"))
                 jsonFile = "tree_dict_PlantingPlus.json";
-            
+
             string modPath = Path.GetDirectoryName(Info.Location);
-           string path = Path.Combine(modPath, "configs", jsonFile);
+            string path = Path.Combine(modPath, "configs", jsonFile);
             //string path = Path.Combine(Path.Combine(modPath, "configs/" + jsonFile));
             //Path.Combine(Path.GetDirectoryName(Plugin.Info.Location), "configs", ")
 
@@ -110,7 +116,7 @@ namespace TreesReborn
                     //random sapling code
 
                     name = seedsDic.FirstOrDefault(s => __instance.name.StartsWith(s.Key)).Value;
-                    
+
                     if (name != null)
                     {
                         if (useRandomSapling.Value)
@@ -118,12 +124,16 @@ namespace TreesReborn
                             name = keyList[Random.Range(0, keyList.Count)];
                         }
                         bool ward = PrivateArea.CheckAccess(__instance.transform.position, 0f, true, true);
-                        Dbgl($"destroyed trunk {__instance.name}, trying to spawn {name}");
+                        //Dbgl($"destroyed trunk {__instance.name}, trying to spawn {name}");
                         GameObject prefab = ZNetScene.instance.GetPrefab(name);
                         if (prefab != null)
                         {
-                            Dbgl($"trying to spawn new tree");
-                            context.StartCoroutine(SpawnTree(prefab, __instance.transform.position));
+                            if (Random.value < treeRate.Value)
+                            {
+                                //Dbgl($"trying to spawn new tree,");
+                                TreesRebornLogger.LogInfo($"destroyed trunk {__instance.name}, trying to spawn {name}");
+                                context.StartCoroutine(SpawnTree(prefab, __instance.transform.position));
+                            }
                         }
                         else
                         {

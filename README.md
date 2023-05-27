@@ -46,6 +46,9 @@ Start the game.
 
 ### Version Information
 
+1.0.5
+updated to newest test branch of Valheim.  
+Add the ability to set a respawn percentage chance.  Default is 100% chance trees will respawn when cut down.
 
 1.0.4
 

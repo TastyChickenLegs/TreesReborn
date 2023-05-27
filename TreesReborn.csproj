@@ -113,9 +113,17 @@
     <Content Include="Libs\ServerSync.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Thunderstore\icon.png" />
+    <Content Include="Thunderstore\plugins\TreesReborn.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Thunderstore\manifest.json" />
+    <None Include="Thunderstore\plugins\configs\tree_dict.json" />
+    <None Include="Thunderstore\plugins\configs\tree_dict_PlantingPlus.json" />
+    <None Include="Thunderstore\plugins\configs\tree_dict_Plant_all_trees.json" />
+    <None Include="Thunderstore\plugins\configs\tree_dict_Plant_Everything.json" />
+    <None Include="Thunderstore\README.md" />
     <None Include="TreesReborn\tree_dict.json" />
     <None Include="TreesReborn\tree_dict_PlantingPlus.json" />
     <None Include="TreesReborn\tree_dict_Plant_all_trees.json" />

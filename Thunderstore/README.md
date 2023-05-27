@@ -1,7 +1,7 @@
 
 # TreesReborn
 
-### Replant trees automatically and configure random tree respawn... for Patch 0.214.2
+### Replant trees automatically and configure random tree respawn... 
 
 Replant trees automatically when they are cut down
 
@@ -10,6 +10,8 @@ Replant trees automatically when they are cut down
 - with serversync send configs down to all players form the server
 - compatible with plant everything and planting plus
 - can now respawn random trees (turned on in config)
+- set the respawn probability in config
+- added mistland trees
 
 
  
@@ -46,6 +48,11 @@ Start the game.
 
 ### Version Information
 
+1.0.5
+
+- updated to newest test branch of Valheim.  
+- Add the ability to set a respawn percentage chance.  Default is 100% chance trees will respawn when cut down.
+- Added Mistland Trees
 
 1.0.4
 
