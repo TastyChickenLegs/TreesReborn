@@ -18,7 +18,7 @@ namespace TreesReborn
     public class TreesRebornPlugin : BaseUnityPlugin
     {
         internal const string ModName = "TreesReborn";
-        internal const string ModVersion = "1.0.5";
+        internal const string ModVersion = "1.0.8";
         internal const string Author = "TastyChickenLegs";
         private const string ModGUID = Author + "." + ModName;
         private static ConfigEntry<bool> isDebug;
@@ -27,6 +27,7 @@ namespace TreesReborn
         public static Dictionary<string, string> seedsDic = new Dictionary<string, string>();
         private readonly Harmony harmony = new(ModGUID);
         public static ConfigEntry<float> respawnDelay;
+        public static ConfigEntry<float> craftingtablenear;
         public static ConfigEntry<bool> useRandomSapling;
         public static ConfigEntry<float> treeRate;
 
@@ -63,8 +64,12 @@ namespace TreesReborn
                 new ConfigurationManagerAttributes { DispName = "Replant Random Sapling" }));
             treeRate = Config.Bind<float>("General", "treeRate", 1f,
                 new ConfigDescription("Chance that trees will be replanted.",
-                new AcceptableValueRange<float>(0f, 1f), null, 
+                new AcceptableValueRange<float>(0f, 1f), null,
                 new ConfigurationManagerAttributes { ShowRangeAsPercent = true, DispName = "Replant Chance" }));
+            craftingtablenear = Config.Bind<float>("General", "checkcraftingtable", 0f,
+                new ConfigDescription("Check for Crafting Table Distance.  Use zero to disable.",
+                new AcceptableValueRange<float>(0f, 100f), null,
+                new ConfigurationManagerAttributes { DispName = "Check for Crafting Table" }));
 
             if (!modEnabled.Value)
                 return;
@@ -109,6 +114,15 @@ namespace TreesReborn
                 if (Player.m_localPlayer)
                 {
                     Dbgl($"destroyed destructible {__instance.name}");
+
+                    // code to check for crafting table.  If zero then it is disabled. If a table is within configured range then stop
+
+                    CraftingStation nearestcrafting = CraftingStation.FindClosestStationInRange("$piece_workbench", __instance.transform.position, craftingtablenear.Value);
+                    if (nearestcrafting != null)
+                    {
+                        Dbgl($"{nearestcrafting}");
+                        return;
+                    }
 
                     List<string> keyList = new List<string>(seedsDic.Values);
 

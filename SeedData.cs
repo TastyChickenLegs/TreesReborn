@@ -6,4 +6,8 @@ namespace TreesReborn
     {
         public List<string> seeds = new List<string>();
     }
+    internal class CraftingData
+    {
+        public List<string> seeds = new List<string>();
+    }
 }

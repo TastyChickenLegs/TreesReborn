@@ -1,9 +1,9 @@
 {
   "name": "TreesReborn",
   "description": "Replant trees automatically when destroying a stump.  Now with Mistland Trees.  Configure to randomize trees respawned",
-  "version_number": "1.0.5",
+  "version_number": "1.0.8",
   "website_url": "https://valheim.thunderstore.io/package/TastyChickenLegs/",
   "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.2101"
+    "denikson-BepInExPack_Valheim-5.4.2202"
   ]
 }

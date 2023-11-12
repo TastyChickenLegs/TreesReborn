@@ -48,6 +48,20 @@ Start the game.
 
 ### Version Information
 
+1.0.8
+
+- added feature to allow no tree replanting near a crating table.  Distance configurable. Use Zero to disable feature.
+
+1.0.7
+
+- updated for Valheim 0.271.22
+
+
+1.0.6
+
+- Updated for Hildir's Request
+
+
 1.0.5
 
 - updated to newest test branch of Valheim.  
